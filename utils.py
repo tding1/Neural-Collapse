@@ -88,6 +88,7 @@ def count_network_parameters(model):
 def print_and_save(text_str, file_stream):
     print(text_str)
     print(text_str, file=file_stream)
+    file_stream.flush()
 
 
 def compute_accuracy(output, target, topk=(1,)):
