@@ -4,7 +4,7 @@ import torch
 
 import models
 from utils import *
-from args import parse_args
+from args import parse_train_args
 from datasets import make_dataset
 
 
@@ -83,7 +83,7 @@ def train(args, model, trainloader):
 
 
 def main():
-    args = parse_args()
+    args = parse_train_args()
 
     if args.optimizer != 'LBFGS':
         sys.exit('Support for training with LBFGS only!')
@@ -91,7 +91,7 @@ def main():
     device = torch.device("cuda:"+str(args.gpu_id) if torch.cuda.is_available() else "cpu")
     args.device = device
 
-    trainloader, _, num_classes = make_dataset(args.dataset, args.batch_size)
+    trainloader, _, num_classes = make_dataset(args.dataset, args.data_dir, args.batch_size, args.sample_size)
 
     model = models.__dict__[args.model](num_classes=num_classes, fc_bias=args.bias).to(device)
     print('# of model parameters: ' + str(count_network_parameters(model)))

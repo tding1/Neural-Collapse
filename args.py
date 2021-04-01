@@ -7,13 +7,13 @@ import torch
 import numpy as np
 
 
-def parse_args():
+def parse_train_args():
     parser = argparse.ArgumentParser()
 
     # parameters
     # Model Selection
     parser.add_argument('--model', type=str, default='resnet18')
-    parser.add_argument('--bias', type=bool, default=True)
+    parser.add_argument('--no-bias', dest='bias', action='store_false')
 
     # Hardware Setting
     parser.add_argument('--gpu_id', type=int, default=0)
@@ -21,14 +21,15 @@ def parse_args():
 
     # Directory Setting
     parser.add_argument('--dataset', type=str, choices=['mnist', 'cifar10'], default='mnist')
+    parser.add_argument('--data_dir', type=str, default='~/data')
     parser.add_argument('--uid', type=str, default=None)
     parser.add_argument('--force', action='store_true', help='force to override the given uid')
-    parser.add_argument('--load_path', type=str, default=None)
 
     # Learning Options
     parser.add_argument('--epochs', type=int, default=200, help='Max Epochs')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
     parser.add_argument('--loss', type=str, default='CrossEntropy', help='loss function configuration')
+    parser.add_argument('--sample_size', type=int, default=None, help='sample size PER CLASS')
 
     # Optimization specifications
     parser.add_argument('--lr', type=float, default=0.1, help='learning rate')
@@ -81,5 +82,31 @@ def parse_args():
     else:
         print("cudnn is not used")
         torch.backends.cudnn.benchmark = False
+
+    return args
+
+
+def parse_eval_args():
+    parser = argparse.ArgumentParser()
+
+    # parameters
+    # Model Selection
+    parser.add_argument('--model', type=str, default='resnet18')
+    parser.add_argument('--no-bias', dest='bias', action='store_false')
+
+    # Hardware Setting
+    parser.add_argument('--gpu_id', type=int, default=0)
+
+    # Directory Setting
+    parser.add_argument('--dataset', type=str, choices=['mnist', 'cifar10'], default='mnist')
+    parser.add_argument('--data_dir', type=str, default='~/data')
+    parser.add_argument('--load_path', type=str, default=None)
+
+    # Learning Options
+    parser.add_argument('--epochs', type=int, default=200, help='Max Epochs')
+    parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
+    parser.add_argument('--sample_size', type=int, default=None, help='sample size PER CLASS')
+
+    args = parser.parse_args()
 
     return args
