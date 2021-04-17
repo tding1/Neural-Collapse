@@ -129,7 +129,7 @@ def plot_ETF2():
         div = np.outer(W_c, W_c)
         cos = WWT / div
         cos = cos - np.diagflat(np.diagonal(cos))
-        tmp = np.abs(cos + 1/9)
+        tmp = np.abs(cos + 1/9 * (np.ones((10, 10))-np.eye(10)))
         val.append(np.mean(tmp.flatten()))
 
     fig = plt.figure(figsize=(10, 8))
