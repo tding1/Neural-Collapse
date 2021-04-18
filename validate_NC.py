@@ -15,7 +15,18 @@ CIFAR10_TRAIN_SAMPLES = 10 * (5000,)
 CIFAR10_TEST_SAMPLES = 10 * (1000,)
 
 
-def compute_info(args, model, dataloader, isTrain=True):
+class FCFeatures:
+    def __init__(self):
+        self.outputs = []
+
+    def __call__(self, module, module_in):
+        self.outputs.append(module_in)
+
+    def clear(self):
+        self.outputs = []
+
+
+def compute_info(args, model, fc_features, dataloader, isTrain=True):
     mu_G = 0
     mu_c_dict = dict()
     top1 = AverageMeter()
@@ -27,7 +38,8 @@ def compute_info(args, model, dataloader, isTrain=True):
         with torch.no_grad():
             outputs = model(inputs)
 
-        features = outputs[1]
+        features = fc_features.outputs[0][0]
+        fc_features.clear()
 
         mu_G += torch.sum(features, dim=0)
 
@@ -64,7 +76,7 @@ def compute_info(args, model, dataloader, isTrain=True):
     return mu_G, mu_c_dict, top1.avg, top5.avg
 
 
-def compute_Sigma_W(args, model, mu_c_dict, dataloader, isTrain=True):
+def compute_Sigma_W(args, model, fc_features, mu_c_dict, dataloader, isTrain=True):
 
     Sigma_W = 0
     for batch_idx, (inputs, targets) in enumerate(dataloader):
@@ -73,7 +85,9 @@ def compute_Sigma_W(args, model, mu_c_dict, dataloader, isTrain=True):
 
         with torch.no_grad():
             outputs = model(inputs)
-        features = outputs[1]
+
+        features = fc_features.outputs[0][0]
+        fc_features.clear()
 
         for b in range(len(targets)):
             y = targets[b].item()
@@ -105,12 +119,14 @@ def main():
     trainloader, testloader, num_classes = make_dataset(args.dataset, args.data_dir, args.batch_size, args.sample_size)
 
     model = models.__dict__[args.model](num_classes=num_classes, fc_bias=args.bias).to(device)
+    fc_features = FCFeatures()
+    model.fc.register_forward_pre_hook(fc_features)
 
     info_dict = {
                  'Sigma_W_train_norm': [],
-                 'Sigma_W_test_norm': [],
                  'W': [],
                  'b': [],
+                 'mu_G_train': [],
                  'train_acc1': [],
                  'train_acc5': [],
                  'test_acc1': [],
@@ -127,14 +143,15 @@ def main():
             if 'fc.bias' in n:
                 b = p
 
-        mu_G_train, mu_c_dict_train, train_acc1, train_acc5 = compute_info(args, model, trainloader, isTrain=True)
-        mu_G_test, mu_c_dict_test, test_acc1, test_acc5 = compute_info(args, model, testloader, isTrain=False)
+        mu_G_train, mu_c_dict_train, train_acc1, train_acc5 = compute_info(args, model, fc_features, trainloader, isTrain=True)
+        mu_G_test, mu_c_dict_test, test_acc1, test_acc5 = compute_info(args, model, fc_features, testloader, isTrain=False)
 
-        Sigma_W_train_norm = compute_Sigma_W(args, model, mu_c_dict_train, trainloader, isTrain=True)
-        Sigma_W_test_norm = compute_Sigma_W(args, model, mu_c_dict_train, testloader, isTrain=False)
+        Sigma_W_train_norm = compute_Sigma_W(args, model, fc_features, mu_c_dict_train, trainloader, isTrain=True)
+        # Sigma_W_test_norm = compute_Sigma_W(args, model, fc_features, mu_c_dict_train, testloader, isTrain=False)
 
         info_dict['Sigma_W_train_norm'].append(Sigma_W_train_norm.cpu().item())
-        info_dict['Sigma_W_test_norm'].append(Sigma_W_test_norm.cpu().item())
+        # info_dict['Sigma_W_test_norm'].append(Sigma_W_test_norm.cpu().item())
+        info_dict['mu_G_train'].append(mu_G_train.detach().cpu().numpy())
         info_dict['W'].append((W.detach().cpu().numpy()))
         if args.bias:
             info_dict['b'].append(b.detach().cpu().numpy())
@@ -144,7 +161,7 @@ def main():
         info_dict['test_acc1'].append(test_acc1)
         info_dict['test_acc5'].append(test_acc5)
 
-    with open(args.load_path + 'info.pkl', 'wb') as f:
+    with open(args.load_path + 'info_raw.pkl', 'wb') as f:
         pickle.dump(info_dict, f)
 
 

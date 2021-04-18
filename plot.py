@@ -5,169 +5,106 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
+id = 0
+datasets = ['mnist', 'cifar10']
+PATH_TO_INFO_SGD = 'training_results/' + datasets[id] + '_CE_SGD_bias_true/info.pkl'
+PATH_TO_INFO_ADAM = 'training_results/' + datasets[id] + '_CE_Adam_bias_true/info.pkl'
+PATH_TO_INFO_LBFGS = 'training_results/' + datasets[id] + '_CE_LBFGS_bias_true/info.pkl'
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--path', type=str, default=None)
-args = parser.parse_args()
-
-out_path = args.path + 'imgs/'
+out_path = 'imgs/'
 if not os.path.exists(out_path):
     os.makedirs(out_path, exist_ok=True)
 
-with open(args.path+'info.pkl', 'rb') as f:
-    info = pickle.load(f)
+with open(PATH_TO_INFO_SGD, 'rb') as f:
+    info_sgd = pickle.load(f)
+
+with open(PATH_TO_INFO_ADAM, 'rb') as f:
+    info_adam = pickle.load(f)
+
+with open(PATH_TO_INFO_LBFGS, 'rb') as f:
+    info_lbfgs = pickle.load(f)
 
 XTICKS = [0, 50, 100, 150, 200]
-YTICKS = [0, 0.05, 0.1, 0.15]
-AXIS = [0, 210, 0, 0.15]
 
 
-def plot_Sigma_W1():
+def plot_Sigma_H():
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(info['Sigma_W_train_norm'], 'r', linewidth=6)
+    plt.plot(info_sgd['Sigma_W_train_norm'], 'r', linewidth=5, alpha=0.7)
+    plt.plot(info_adam['Sigma_W_train_norm'], 'b', linewidth=5, alpha=0.7)
+    plt.plot(info_lbfgs['Sigma_W_train_norm'], 'g', linewidth=5, alpha=0.7)
     plt.xlabel('Epoch', fontsize=30)
-    plt.ylabel(r'$\|\|{\bf{\Sigma_W}}\|\|_F$', fontsize=30)
+    plt.ylabel(r'$\|\|{\bf{\Sigma_H}}\|\|_F$', fontsize=30)
     plt.xticks(XTICKS, fontsize=30)
-    plt.yticks(YTICKS, fontsize=30)
-    plt.axis(AXIS)
+    plt.yticks(np.arange(0,0.12,0.02), fontsize=30)
+    plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
+    plt.axis([0, 210, 0, 0.1])
 
-    fig.savefig(out_path+"Sigma_W_train_norm.pdf", bbox_inches='tight')
-
-
-def plot_Sigma_W2():
-    fig = plt.figure(figsize=(10, 8))
-    plt.plot(info['Sigma_W_test_norm'], 'r', linewidth=6)
-    plt.xlabel('Epoch', fontsize=30)
-    plt.ylabel(r'$\|\|{\bf{\Sigma_W}}\|\|_F$', fontsize=30)
-    plt.xticks(XTICKS, fontsize=30)
-    plt.yticks(YTICKS, fontsize=30)
-    # plt.axis(AXIS)
-
-    fig.savefig(out_path+"Sigma_W_test_norm.pdf", bbox_inches='tight')
-
-
-def plot_b_k_norm():
-    b_list = info['b']
-    b_norm = []
-    for i in range(len(b_list)):
-        b_norm.append(np.sqrt(np.sum(b_list[i]**2)))
-
-    fig = plt.figure(figsize=(10, 8))
-    plt.plot(b_norm, 'r', linewidth=6)
-    plt.xlabel('Epoch', fontsize=30)
-    plt.ylabel(r'$\|\|{\bf{b}}_k\|\|_2$', fontsize=30)
-    plt.xticks(XTICKS, fontsize=30)
-    plt.yticks(YTICKS, fontsize=30)
-    plt.axis(AXIS)
-
-    fig.savefig(out_path + "bias_norm.pdf", bbox_inches='tight')
+    fig.savefig(out_path+"Sigma_H_train_norm.pdf", bbox_inches='tight')
 
 
 def plot_b_k_variance():
-    b_list = info['b']
-    b_norm = []
+    b_list = info_sgd['b']
+    b_norm_sgd = []
     for i in range(len(b_list)):
-        b_norm.append(np.std(b_list[i]))
+        b_norm_sgd.append(np.std(b_list[i]))
+
+    b_list = info_adam['b']
+    b_norm_adam = []
+    for i in range(len(b_list)):
+        b_norm_adam.append(np.std(b_list[i]))
+
+    b_list = info_lbfgs['b']
+    b_norm_lbfgs = []
+    for i in range(len(b_list)):
+        b_norm_lbfgs.append(np.std(b_list[i]))
 
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(b_norm, 'r', linewidth=6)
+    plt.plot(b_norm_sgd, 'r', linewidth=5, alpha=0.7)
+    plt.plot(b_norm_adam, 'b', linewidth=5, alpha=0.7)
+    plt.plot(b_norm_lbfgs, 'g', linewidth=5, alpha=0.7)
     plt.xlabel('Epoch', fontsize=30)
     plt.ylabel(r'${\rm{Std}}({\bf{b}}_k)$', fontsize=30)
     plt.xticks(XTICKS, fontsize=30)
-    plt.yticks(YTICKS, fontsize=30)
-    plt.axis(AXIS)
+    plt.yticks(np.arange(0, 0.06, 0.01), fontsize=30)
+    plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
+    plt.axis([0, 210, 0, 0.05])
 
     fig.savefig(out_path + "bias_variance.pdf", bbox_inches='tight')
 
 
-def plot_W_k():
-    W_list = info['W']
-    W_norm = []
-    for i in range(len(W_list)):
-        W_c = np.sqrt(np.sum(W_list[i]**2, axis=1))
-        W_norm.append(np.std(W_c) / np.mean(W_c))
-
-    fig = plt.figure(figsize=(10, 8))
-    plt.plot(W_norm, 'r', linewidth=6)
-    plt.xlabel('Epoch', fontsize=30)
-    plt.ylabel(r'${\rm{Std}}_c (\|\|{\bf w}_c\|\|_2) / {\rm{Avg}}_c (\|\|{\bf w}_c\|\|_2)$', fontsize=30)
-    plt.xticks(XTICKS, fontsize=30)
-    plt.yticks(YTICKS, fontsize=30)
-    plt.axis(AXIS)
-
-    fig.savefig(out_path + "W.pdf", bbox_inches='tight')
-
-
-def plot_ETF1():
-    W_list = info['W']
-    angle = []
-    for i in range(len(W_list)):
-        WWT = W_list[i] @ W_list[i].T
-        W_c = np.sqrt(np.sum(W_list[i] ** 2, axis=1))
-        div = np.outer(W_c, W_c)
-        cos = WWT / div
-        cos = cos - np.diagflat(np.diagonal(cos))
-        angle.append(np.std(cos.flatten()))
-
-    fig = plt.figure(figsize=(10, 8))
-    plt.plot(angle, 'r', linewidth=6)
-    plt.xlabel('Epoch', fontsize=30)
-    plt.ylabel(r'${\rm{Std}}_{c\neq c^\prime} (\cos_{\bf w}(c,c^\prime))$', fontsize=30)
-    plt.xticks(XTICKS, fontsize=30)
-    plt.yticks(YTICKS, fontsize=30)
-    plt.axis(AXIS)
-
-    fig.savefig(out_path + "ETF_angle.pdf", bbox_inches='tight')
-
-
-def plot_ETF2():
-    W_list = info['W']
+def compute_ETF(W_list):
     val = []
     for i in range(len(W_list)):
         WWT = W_list[i] @ W_list[i].T
-        W_c = np.sqrt(np.sum(W_list[i] ** 2, axis=1))
-        div = np.outer(W_c, W_c)
-        cos = WWT / div
-        cos = cos - np.diagflat(np.diagonal(cos))
-        tmp = np.abs(cos + 1/9 * (np.ones((10, 10))-np.eye(10)))
-        val.append(np.mean(tmp.flatten()))
+        sub = 10/9*(np.eye(10)-np.ones((10, 10))/10)
+        div = np.linalg.norm(W_list[i], 'fro') ** 2 / 10
+        val.append(np.linalg.norm(WWT/div-sub, 'fro')**2)
+    return val
+
+
+def plot_ETF():
+    ETF_sgd = compute_ETF(info_sgd['W'])
+    ETF_adam = compute_ETF(info_adam['W'])
+    ETF_lbfgs = compute_ETF(info_lbfgs['W'])
 
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(val, 'r', linewidth=6)
+    plt.plot(ETF_sgd, 'r', linewidth=5, alpha=0.7)
+    plt.plot(ETF_adam, 'b', linewidth=5, alpha=0.7)
+    plt.plot(ETF_lbfgs, 'g', linewidth=5, alpha=0.7)
     plt.xlabel('Epoch', fontsize=30)
-    plt.ylabel(r'${\rm{Avg}}_{c\neq c^\prime} \|\cos_{\bf w}(c,c^\prime)+1/(C-1)\|$', fontsize=30)
+    plt.ylabel('ETF', fontsize=30)
     plt.xticks(XTICKS, fontsize=30)
-    plt.yticks(YTICKS, fontsize=30)
-    plt.axis(AXIS)
+    plt.yticks(np.arange(0,4.5,1), fontsize=30)
+    plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
+    plt.axis([0, 210, 0, 4.5])
 
-    fig.savefig(out_path + "ETF_val.pdf", bbox_inches='tight')
-
-
-def plot_acc():
-    train_acc1 = info['train_acc1']
-    test_acc1 = info['test_acc1']
-
-    fig = plt.figure(figsize=(10, 8))
-    plt.plot(train_acc1, 'r', linewidth=6)
-    plt.plot(test_acc1, 'b', linewidth=6)
-    plt.xlabel('Epoch', fontsize=30)
-    plt.xticks(XTICKS, fontsize=30)
-    # plt.axis(AXIS)
-    # plt.axis([0, 210, 98, 100])
-    plt.legend(['training accuracy', 'testing accuracy'], fontsize=30)
-
-    fig.savefig(out_path + "acc.pdf", bbox_inches='tight')
+    fig.savefig(out_path + "ETF.pdf", bbox_inches='tight')
 
 
 def main():
-    plot_Sigma_W1()
-    plot_Sigma_W2()
-    plot_b_k_norm()
+    plot_Sigma_H()
     plot_b_k_variance()
-    plot_W_k()
-    plot_ETF1()
-    plot_ETF2()
-    plot_acc()
+    plot_ETF()
 
 
 if __name__ == "__main__":

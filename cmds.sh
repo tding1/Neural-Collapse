@@ -9,9 +9,9 @@ python train_1st_order.py --gpu_id 0 --uid mnist_CE_SGD_bias_true --dataset mnis
 
 python train_1st_order.py --gpu_id 0 --uid mnist_CE_SGD_bias_false --dataset mnist --loss CrossEntropy --no-bias --optimizer SGD --lr 0.05
 
-python train_1st_order.py --gpu_id 0 --uid cifar10_CE_SGD_bias_true --dataset cifar10 --loss CrossEntropy --optimizer SGD --lr 0.05
+python train_1st_order.py --gpu_id 0 --uid cifar10_CE_SGD_bias_true --dataset cifar10 --loss CrossEntropy --optimizer SGD --lr 0.01
 
-python train_1st_order.py --gpu_id 0 --uid cifar10_CE_SGD_bias_false --dataset cifar10 --loss CrossEntropy --no-bias --optimizer SGD --lr 0.05
+python train_1st_order.py --gpu_id 0 --uid cifar10_CE_SGD_bias_false --dataset cifar10 --loss CrossEntropy --no-bias --optimizer SGD --lr 0.01
 
 
 
@@ -20,20 +20,20 @@ python train_1st_order.py --gpu_id 0 --uid mnist_CE_Adam_bias_true --dataset mni
 
 python train_1st_order.py --gpu_id 0 --uid mnist_CE_Adam_bias_false --dataset mnist --loss CrossEntropy --no-bias --optimizer Adam --lr 0.0001
 
-python train_1st_order.py --gpu_id 0 --uid cifar10_CE_Adam_bias_true --dataset cifar10 --loss CrossEntropy --optimizer Adam --lr 0.0001
+python train_1st_order.py --gpu_id 0 --uid cifar10_CE_Adam_bias_true --dataset cifar10 --loss CrossEntropy --optimizer Adam --lr 0.001
 
-python train_1st_order.py --gpu_id 0 --uid cifar10_CE_Adam_bias_false --dataset cifar10 --loss CrossEntropy --no-bias --optimizer Adam --lr 0.0001
-
-
+python train_1st_order.py --gpu_id 0 --uid cifar10_CE_Adam_bias_false --dataset cifar10 --loss CrossEntropy --no-bias --optimizer Adam --lr 0.001
 
 
-python train_2nd_order.py --gpu_id 0 --uid mnist_CE_LBFGS_bias_true --dataset mnist --loss CrossEntropy --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 1024
 
-python train_2nd_order.py --gpu_id 0 --uid mnist_CE_LBFGS_bias_false --dataset mnist --loss CrossEntropy --no-bias --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 1024
 
-python train_2nd_order.py --gpu_id 0 --uid cifar10_CE_LBFGS_bias_true --dataset cifar10 --loss CrossEntropy --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 1024
+python train_2nd_order.py --gpu_id 0 --uid mnist_CE_LBFGS_bias_true --dataset mnist --loss CrossEntropy --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 2048
 
-python train_2nd_order.py --gpu_id 0 --uid cifar10_CE_LBFGS_bias_false --dataset cifar10 --loss CrossEntropy --no-bias --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 1024
+python train_2nd_order.py --gpu_id 0 --uid mnist_CE_LBFGS_bias_false --dataset mnist --loss CrossEntropy --no-bias --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 2048
+
+python train_2nd_order.py --gpu_id 0 --uid cifar10_CE_LBFGS_bias_true --dataset cifar10 --loss CrossEntropy --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 2048
+
+python train_2nd_order.py --gpu_id 0 --uid cifar10_CE_LBFGS_bias_false --dataset cifar10 --loss CrossEntropy --no-bias --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 2048
 
 
 
