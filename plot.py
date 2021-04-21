@@ -1,15 +1,15 @@
 import os
 import pickle
-import argparse
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-id = 0
+
+id = 1
 datasets = ['mnist', 'cifar10']
-PATH_TO_INFO_SGD = 'training_results/' + datasets[id] + '_CE_SGD_bias_true/info.pkl'
-PATH_TO_INFO_ADAM = 'training_results/' + datasets[id] + '_CE_Adam_bias_true/info.pkl'
-PATH_TO_INFO_LBFGS = 'training_results/' + datasets[id] + '_CE_LBFGS_bias_true/info.pkl'
+PATH_TO_INFO_SGD = 'model_weights/' + datasets[id] + '_CE_SGD_bias_true2/info_raw.pkl'
+PATH_TO_INFO_ADAM = 'model_weights/' + datasets[id] + '_CE_Adam_bias_true1/info_raw.pkl'
+PATH_TO_INFO_LBFGS = 'model_weights/' + datasets[id] + '_CE_LBFGS_bias_true1/info_raw.pkl'
 
 out_path = 'imgs/'
 if not os.path.exists(out_path):
@@ -27,19 +27,19 @@ with open(PATH_TO_INFO_LBFGS, 'rb') as f:
 XTICKS = [0, 50, 100, 150, 200]
 
 
-def plot_Sigma_H():
+def plot_collapse():
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(info_sgd['Sigma_W_train_norm'], 'r', linewidth=5, alpha=0.7)
-    plt.plot(info_adam['Sigma_W_train_norm'], 'b', linewidth=5, alpha=0.7)
-    plt.plot(info_lbfgs['Sigma_W_train_norm'], 'g', linewidth=5, alpha=0.7)
+    plt.plot(info_sgd['collapse_metric'], 'r', linewidth=5, alpha=0.7)
+    plt.plot(info_adam['collapse_metric'], 'b', linewidth=5, alpha=0.7)
+    plt.plot(info_lbfgs['collapse_metric'], 'g', linewidth=5, alpha=0.7)
     plt.xlabel('Epoch', fontsize=30)
-    plt.ylabel(r'$\|\|{\bf{\Sigma_H}}\|\|_F$', fontsize=30)
+    plt.ylabel(r'Tr(Sw/Sb)/K', fontsize=30)
     plt.xticks(XTICKS, fontsize=30)
-    plt.yticks(np.arange(0,0.12,0.02), fontsize=30)
+    # plt.yticks(np.arange(0,0.12,0.02), fontsize=30)
     plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
-    plt.axis([0, 210, 0, 0.1])
+    # plt.axis([0, 210, 0, 0.1])
 
-    fig.savefig(out_path+"Sigma_H_train_norm.pdf", bbox_inches='tight')
+    fig.savefig(out_path+"collapse.pdf", bbox_inches='tight')
 
 
 def plot_b_k_variance():
@@ -101,10 +101,69 @@ def plot_ETF():
     fig.savefig(out_path + "ETF.pdf", bbox_inches='tight')
 
 
+def plot_residual():
+    b_list = info_sgd['b']
+    W_list = info_sgd['W']
+    mu_G_list = info_sgd['mu_G_train']
+    res_sgd = []
+    for i in range(len(b_list)):
+        res = W_list[i] @ mu_G_list[i] + b_list[i]
+        res_sgd.append(np.linalg.norm(res)**2)
+
+    b_list = info_adam['b']
+    W_list = info_adam['W']
+    mu_G_list = info_adam['mu_G_train']
+    res_adam = []
+    for i in range(len(b_list)):
+        res = W_list[i] @ mu_G_list[i] + b_list[i]
+        res_adam.append(np.linalg.norm(res) ** 2)
+
+    b_list = info_lbfgs['b']
+    W_list = info_lbfgs['W']
+    mu_G_list = info_lbfgs['mu_G_train']
+    res_lbfgs = []
+    for i in range(len(b_list)):
+        res = W_list[i] @ mu_G_list[i] + b_list[i]
+        res_lbfgs.append(np.linalg.norm(res) ** 2)
+
+    fig = plt.figure(figsize=(10, 8))
+    plt.plot(res_sgd, 'r', linewidth=5, alpha=0.7)
+    plt.plot(res_adam, 'b', linewidth=5, alpha=0.7)
+    plt.plot(res_lbfgs, 'g', linewidth=5, alpha=0.7)
+    plt.xlabel('Epoch', fontsize=30)
+    plt.ylabel(r'$\|\|{\bf b}+{\bf W \alpha}\|\|_2^2$', fontsize=30)
+    plt.xticks(XTICKS, fontsize=30)
+    # plt.yticks(np.arange(0, 4.5, 1), fontsize=30)
+    plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
+    # plt.axis([0, 210, 0, 4.5])
+
+    fig.savefig(out_path + "res.pdf", bbox_inches='tight')
+
+
+def plot_acc():
+    test_acc_sgd = info_sgd['test_acc1']
+    test_acc_adam = info_adam['test_acc1']
+    test_acc_lbfgs = info_lbfgs['test_acc1']
+
+    fig = plt.figure(figsize=(10, 8))
+    plt.plot(test_acc_sgd, 'r', linewidth=5, alpha=0.7)
+    plt.plot(test_acc_adam, 'b', linewidth=5, alpha=0.7)
+    plt.plot(test_acc_lbfgs, 'g', linewidth=5, alpha=0.7)
+    plt.xlabel('Epoch', fontsize=30)
+    plt.xticks(XTICKS, fontsize=30)
+    # plt.axis(AXIS)
+    # plt.axis([0, 210, 98, 100])
+    plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
+
+    fig.savefig(out_path + "acc.pdf", bbox_inches='tight')
+
+
 def main():
     plot_Sigma_H()
     plot_b_k_variance()
     plot_ETF()
+    # plot_residual()
+    plot_acc()
 
 
 if __name__ == "__main__":

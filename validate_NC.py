@@ -2,6 +2,7 @@ import sys
 import pickle
 
 import torch
+import scipy.linalg as scilin
 
 import models
 from utils import *
@@ -104,7 +105,18 @@ def compute_Sigma_W(args, model, fc_features, mu_c_dict, dataloader, isTrain=Tru
         else:
             Sigma_W /= sum(CIFAR10_TEST_SAMPLES)
 
-    return torch.norm(Sigma_W)
+    return Sigma_W.cpu().numpy()
+
+
+def compute_Sigma_B(mu_c_dict, mu_G):
+    Sigma_B = 0
+    K = len(mu_c_dict)
+    for i in range(K):
+        Sigma_B += (mu_c_dict[i] - mu_G).unsqueeze(1) @ (mu_c_dict[i] - mu_G).unsqueeze(0)
+
+    Sigma_B /= K
+
+    return Sigma_B.cpu().numpy()
 
 
 def main():
@@ -123,7 +135,7 @@ def main():
     model.fc.register_forward_pre_hook(fc_features)
 
     info_dict = {
-                 'Sigma_W_train_norm': [],
+                 'collapse_metric': [],
                  'W': [],
                  'b': [],
                  'mu_G_train': [],
@@ -146,11 +158,13 @@ def main():
         mu_G_train, mu_c_dict_train, train_acc1, train_acc5 = compute_info(args, model, fc_features, trainloader, isTrain=True)
         mu_G_test, mu_c_dict_test, test_acc1, test_acc5 = compute_info(args, model, fc_features, testloader, isTrain=False)
 
-        Sigma_W_train_norm = compute_Sigma_W(args, model, fc_features, mu_c_dict_train, trainloader, isTrain=True)
+        Sigma_W = compute_Sigma_W(args, model, fc_features, mu_c_dict_train, trainloader, isTrain=True)
         # Sigma_W_test_norm = compute_Sigma_W(args, model, fc_features, mu_c_dict_train, testloader, isTrain=False)
+        Sigma_B = compute_Sigma_B(mu_c_dict_train, mu_G_train)
 
-        info_dict['Sigma_W_train_norm'].append(Sigma_W_train_norm.cpu().item())
-        # info_dict['Sigma_W_test_norm'].append(Sigma_W_test_norm.cpu().item())
+        collapse_metric = np.trace(Sigma_W @ scilin.pinv(Sigma_B)) / len(mu_c_dict_train)
+
+        info_dict['collapse_metric'].append(collapse_metric)
         info_dict['mu_G_train'].append(mu_G_train.detach().cpu().numpy())
         info_dict['W'].append((W.detach().cpu().numpy()))
         if args.bias:
