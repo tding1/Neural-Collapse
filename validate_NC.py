@@ -119,6 +119,19 @@ def compute_Sigma_B(mu_c_dict, mu_G):
     return Sigma_B.cpu().numpy()
 
 
+def compute_W_H_relation(W, mu_c_dict, mu_G):
+    K = len(mu_c_dict)
+    M = torch.empty(mu_c_dict[0].shape[0], K)
+    for i in range(K):
+        M[:, i] = mu_c_dict[i] - mu_G
+    M /= torch.norm(M, p='fro')
+    W = W / torch.norm(W, p='fro')
+
+    res = torch.norm(torch.transpose(W, 0, 1).cpu() - M, p='fro')
+
+    return res.detach().cpu().numpy()
+
+
 def main():
     args = parse_eval_args()
 
@@ -136,6 +149,7 @@ def main():
 
     info_dict = {
                  'collapse_metric': [],
+                 'WH_relation_metric': [],
                  'W': [],
                  'b': [],
                  'mu_G_train': [],
@@ -163,8 +177,10 @@ def main():
         Sigma_B = compute_Sigma_B(mu_c_dict_train, mu_G_train)
 
         collapse_metric = np.trace(Sigma_W @ scilin.pinv(Sigma_B)) / len(mu_c_dict_train)
+        WH_relation_metric = compute_W_H_relation(W, mu_c_dict_train, mu_G_train)
 
         info_dict['collapse_metric'].append(collapse_metric)
+        info_dict['WH_relation_metric'].append(WH_relation_metric)
         info_dict['mu_G_train'].append(mu_G_train.detach().cpu().numpy())
         info_dict['W'].append((W.detach().cpu().numpy()))
         if args.bias:

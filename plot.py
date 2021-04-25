@@ -29,17 +29,38 @@ XTICKS = [0, 50, 100, 150, 200]
 
 def plot_collapse():
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(info_sgd['collapse_metric'], 'r', linewidth=5, alpha=0.7)
-    plt.plot(info_adam['collapse_metric'], 'b', linewidth=5, alpha=0.7)
-    plt.plot(info_lbfgs['collapse_metric'], 'g', linewidth=5, alpha=0.7)
+    plt.scatter(np.arange(0, 200), info_sgd['collapse_metric'], s=35, c='r', alpha=0.7)
+    plt.scatter(np.arange(0, 200), info_adam['collapse_metric'], s=35, c='b', alpha=0.7)
+    plt.scatter(np.arange(0, 200), info_lbfgs['collapse_metric'], s=35, c='g', alpha=0.7)
+    # plt.plot(info_sgd['collapse_metric'], 'r', linewidth=5, alpha=0.7)
+    # plt.plot(info_adam['collapse_metric'], 'b', linewidth=5, alpha=0.7)
+    # plt.plot(info_lbfgs['collapse_metric'], 'g', linewidth=5, alpha=0.7)
     plt.xlabel('Epoch', fontsize=30)
-    plt.ylabel(r'Tr(Sw/Sb)/K', fontsize=30)
+    plt.ylabel(r'Tr$({\bf{\Sigma_W}}{\bf{\Sigma_B}}^\dagger)/K$', fontsize=30)
     plt.xticks(XTICKS, fontsize=30)
-    # plt.yticks(np.arange(0,0.12,0.02), fontsize=30)
+    plt.yticks(np.arange(0, 4, 1), fontsize=30)
     plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
-    # plt.axis([0, 210, 0, 0.1])
+    plt.axis([0, 210, 0, 3])
 
-    fig.savefig(out_path+"collapse.pdf", bbox_inches='tight')
+    fig.savefig(out_path + "collapse.pdf", bbox_inches='tight')
+
+
+def plot_WH_relation():
+    fig = plt.figure(figsize=(10, 8))
+    plt.scatter(np.arange(0, 200), info_sgd['WH_relation_metric'], s=35, c='r', alpha=0.7)
+    plt.scatter(np.arange(0, 200), info_adam['WH_relation_metric'], s=35, c='b', alpha=0.7)
+    plt.scatter(np.arange(0, 200), info_lbfgs['WH_relation_metric'], s=35, c='g', alpha=0.7)
+    # plt.plot(info_sgd['collapse_metric'], 'r', linewidth=5, alpha=0.7)
+    # plt.plot(info_adam['collapse_metric'], 'b', linewidth=5, alpha=0.7)
+    # plt.plot(info_lbfgs['collapse_metric'], 'g', linewidth=5, alpha=0.7)
+    plt.xlabel('Epoch', fontsize=30)
+    plt.ylabel(r'$\mathcal{NC}_3$', fontsize=30)
+    plt.xticks(XTICKS, fontsize=30)
+    plt.yticks(np.arange(0, 4, 1), fontsize=30)
+    plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
+    plt.axis([0, 210, 0, 3])
+
+    fig.savefig(out_path + "W-H.pdf", bbox_inches='tight')
 
 
 def plot_b_k_variance():
@@ -159,10 +180,10 @@ def plot_acc():
 
 
 def main():
-    plot_Sigma_H()
-    plot_b_k_variance()
+    plot_collapse()
+    plot_WH_relation()
     plot_ETF()
-    # plot_residual()
+    plot_residual()
     plot_acc()
 
 
