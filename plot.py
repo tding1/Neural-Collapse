@@ -47,11 +47,12 @@ def plot_collapse():
 
 def compute_ETF(W_list):
     val = []
+    K = W_list[0].shape[0]
     for i in range(len(W_list)):
         WWT = W_list[i] @ W_list[i].T
-        sub = 10 / 9 * (np.eye(10) - np.ones((10, 10)) / 10)
-        div = np.linalg.norm(W_list[i], 'fro') ** 2 / 10
-        val.append(np.linalg.norm(WWT / div - sub, 'fro') * np.sqrt(9) / 10)
+        sub = 1 / np.sqrt(K-1) * (np.eye(K) - np.ones((K, K)) / K)
+        div = np.linalg.norm(WWT, 'fro')
+        val.append(np.linalg.norm(WWT / div - sub, 'fro'))
     return val
 
 

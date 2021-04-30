@@ -124,10 +124,10 @@ def compute_W_H_relation(W, mu_c_dict, mu_G):
     M = torch.empty(mu_c_dict[0].shape[0], K)
     for i in range(K):
         M[:, i] = mu_c_dict[i] - mu_G
-    M /= torch.norm(M, p='fro')
-    W = W / torch.norm(W, p='fro')
+    sub = 1 / np.sqrt(K-1) * (torch.eye(K) - torch.ones(K, K) / K)
 
-    res = torch.norm(torch.transpose(W, 0, 1).cpu() - M, p='fro')
+    WH = W.cpu() @ M
+    res = torch.norm(WH / torch.norm(WH, p='fro') - sub, p='fro')
 
     return res.detach().cpu().numpy()
 
@@ -138,7 +138,7 @@ def main():
     if args.load_path is None:
         sys.exit('Need to input the path to a pre-trained model!')
 
-    device = torch.device("cuda:"+str(args.gpu_id) if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:" + str(args.gpu_id) if torch.cuda.is_available() else "cpu")
     args.device = device
 
     trainloader, testloader, num_classes = make_dataset(args.dataset, args.data_dir, args.batch_size, args.sample_size)
@@ -148,19 +148,19 @@ def main():
     model.fc.register_forward_pre_hook(fc_features)
 
     info_dict = {
-                 'collapse_metric': [],
-                 'WH_relation_metric': [],
-                 'W': [],
-                 'b': [],
-                 'mu_G_train': [],
-                 'train_acc1': [],
-                 'train_acc5': [],
-                 'test_acc1': [],
-                 'test_acc5': []
-                 }
+        'collapse_metric': [],
+        'WH_relation_metric': [],
+        'W': [],
+        'b': [],
+        'mu_G_train': [],
+        'train_acc1': [],
+        'train_acc5': [],
+        'test_acc1': [],
+        'test_acc5': []
+    }
     for i in range(args.epochs):
         print(i)
-        model.load_state_dict(torch.load(args.load_path + 'epoch_' + str(i+1).zfill(3) + '.pth'))
+        model.load_state_dict(torch.load(args.load_path + 'epoch_' + str(i + 1).zfill(3) + '.pth'))
         model.eval()
 
         for n, p in model.named_parameters():
