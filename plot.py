@@ -32,15 +32,16 @@ def plot_collapse():
     # plt.scatter(np.arange(0, 200), info_sgd['collapse_metric'], s=35, c='r', alpha=0.7)
     # plt.scatter(np.arange(0, 200), info_adam['collapse_metric'], s=35, c='b', alpha=0.7)
     # plt.scatter(np.arange(0, 200), info_lbfgs['collapse_metric'], s=35, c='g', alpha=0.7)
-    plt.plot(info_sgd['collapse_metric'], 'r', linewidth=5, alpha=0.7)
-    plt.plot(info_adam['collapse_metric'], 'b', linewidth=5, alpha=0.7)
-    plt.plot(info_lbfgs['collapse_metric'], 'g', linewidth=5, alpha=0.7)
+    plt.plot(info_sgd['collapse_metric'], 'r+-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(info_adam['collapse_metric'], 'bo-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(info_lbfgs['collapse_metric'], 'gd-', linewidth=3, alpha=0.7, markersize=7)
     plt.xlabel('Epoch', fontsize=40)
     plt.ylabel(r'$\mathcal{NC}_1$', fontsize=40)
     plt.xticks(XTICKS, fontsize=30)
     plt.yticks(np.arange(0, 0.41, 0.1), fontsize=30)
     plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
-    plt.axis([0, 210, 0, 0.4])
+    plt.axis([0, 200, 0, 0.4])
+    plt.grid(which='both')
 
     fig.savefig(out_path + datasets[id] + "-resnet18-NC1.pdf", bbox_inches='tight')
 
@@ -62,15 +63,16 @@ def plot_ETF():
     ETF_lbfgs = compute_ETF(info_lbfgs['W'])
 
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(ETF_sgd, 'r', linewidth=5, alpha=0.7)
-    plt.plot(ETF_adam, 'b', linewidth=5, alpha=0.7)
-    plt.plot(ETF_lbfgs, 'g', linewidth=5, alpha=0.7)
+    plt.plot(ETF_sgd, 'r+-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(ETF_adam, 'bo-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(ETF_lbfgs, 'gd-', linewidth=3, alpha=0.7, markersize=7)
     plt.xlabel('Epoch', fontsize=40)
     plt.ylabel(r'$\mathcal{NC}_2$', fontsize=40)
     plt.xticks(XTICKS, fontsize=30)
     plt.yticks(np.arange(0, 1.1, .2), fontsize=30)
     plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
-    plt.axis([0, 210, 0, 1])
+    plt.axis([0, 200, 0, 1])
+    plt.grid(which='both')
 
     fig.savefig(out_path + datasets[id] + "-resnet18-NC2.pdf", bbox_inches='tight')
 
@@ -80,15 +82,16 @@ def plot_WH_relation():
     # plt.scatter(np.arange(0, 200), info_sgd['WH_relation_metric'], s=35, c='r', alpha=0.7)
     # plt.scatter(np.arange(0, 200), info_adam['WH_relation_metric'], s=35, c='b', alpha=0.7)
     # plt.scatter(np.arange(0, 200), info_lbfgs['WH_relation_metric'], s=35, c='g', alpha=0.7)
-    plt.plot(info_sgd['WH_relation_metric'], 'r', linewidth=5, alpha=0.7)
-    plt.plot(info_adam['WH_relation_metric'], 'b', linewidth=5, alpha=0.7)
-    plt.plot(info_lbfgs['WH_relation_metric'], 'g', linewidth=5, alpha=0.7)
+    plt.plot(info_sgd['WH_relation_metric'], 'r+-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(info_adam['WH_relation_metric'], 'bo-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(info_lbfgs['WH_relation_metric'], 'gd-', linewidth=3, alpha=0.7, markersize=7)
     plt.xlabel('Epoch', fontsize=40)
     plt.ylabel(r'$\mathcal{NC}_3$', fontsize=40)
     plt.xticks(XTICKS, fontsize=30)
     plt.yticks(np.arange(0, 1.1, .2), fontsize=30)
     plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
-    plt.axis([0, 210, 0, 1])
+    plt.axis([0, 200, 0, 1])
+    plt.grid(which='both')
 
     fig.savefig(out_path + datasets[id] + "-resnet18-NC3.pdf", bbox_inches='tight')
 
@@ -119,15 +122,16 @@ def plot_residual():
         res_lbfgs.append(np.linalg.norm(res))
 
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(res_sgd, 'r', linewidth=5, alpha=0.7)
-    plt.plot(res_adam, 'b', linewidth=5, alpha=0.7)
-    plt.plot(res_lbfgs, 'g', linewidth=5, alpha=0.7)
+    plt.plot(res_sgd, 'r+-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(res_adam, 'bo-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(res_lbfgs, 'gd-', linewidth=3, alpha=0.7, markersize=7)
     plt.xlabel('Epoch', fontsize=40)
     plt.ylabel(r'$\mathcal{NC}_4$', fontsize=40)
     plt.xticks(XTICKS, fontsize=30)
     plt.yticks(np.arange(0, 11, 2), fontsize=30)
     plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30)
-    plt.axis([0, 210, 0, 10])
+    plt.axis([0, 200, 0, 10])
+    plt.grid(which='both')
 
     fig.savefig(out_path + datasets[id] + "-resnet18-NC4.pdf", bbox_inches='tight')
 
@@ -138,9 +142,9 @@ def plot_train_acc():
     test_acc_lbfgs = info_lbfgs['train_acc1']
 
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(test_acc_sgd, 'r', linewidth=5, alpha=0.7)
-    plt.plot(test_acc_adam, 'b', linewidth=5, alpha=0.7)
-    plt.plot(test_acc_lbfgs, 'g', linewidth=5, alpha=0.7)
+    plt.plot(test_acc_sgd, 'r+-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(test_acc_adam, 'bo-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(test_acc_lbfgs, 'gd-', linewidth=3, alpha=0.7, markersize=7)
     # plt.scatter(np.arange(0, 200), test_acc_sgd, s=35, c='r', alpha=0.7)
     # plt.scatter(np.arange(0, 200), test_acc_adam, s=35, c='b', alpha=0.7)
     # plt.scatter(np.arange(0, 200), test_acc_lbfgs, s=35, c='g', alpha=0.7)
@@ -148,9 +152,10 @@ def plot_train_acc():
     plt.xticks(XTICKS, fontsize=30)
     plt.yticks(np.arange(90, 101, 2), fontsize=30)
     # plt.axis(AXIS)
-    plt.axis([0, 210, 90, 100])
+    plt.axis([0, 200, 90, 100])
     plt.ylabel('Training accuracy', fontsize=40)
     plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30, loc=4)
+    plt.grid(which='both')
 
     fig.savefig(out_path + datasets[id] + "-resnet18-train-acc.pdf", bbox_inches='tight')
 
@@ -161,9 +166,9 @@ def plot_test_acc():
     test_acc_lbfgs = info_lbfgs['test_acc1']
 
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(test_acc_sgd, 'r', linewidth=5, alpha=0.7)
-    plt.plot(test_acc_adam, 'b', linewidth=5, alpha=0.7)
-    plt.plot(test_acc_lbfgs, 'g', linewidth=5, alpha=0.7)
+    plt.plot(test_acc_sgd, 'r+-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(test_acc_adam, 'bo-', linewidth=3, alpha=0.7, markersize=7)
+    plt.plot(test_acc_lbfgs, 'gd-', linewidth=3, alpha=0.7, markersize=7)
     # plt.scatter(np.arange(0, 200), test_acc_sgd, s=35, c='r', alpha=0.7)
     # plt.scatter(np.arange(0, 200), test_acc_adam, s=35, c='b', alpha=0.7)
     # plt.scatter(np.arange(0, 200), test_acc_lbfgs, s=35, c='g', alpha=0.7)
@@ -171,9 +176,10 @@ def plot_test_acc():
     plt.xticks(XTICKS, fontsize=30)
     plt.yticks(np.arange(90, 101, 2), fontsize=30)
     # plt.axis(AXIS)
-    plt.axis([0, 210, 90, 100])
+    plt.axis([0, 200, 90, 100])
     plt.ylabel('Testing accuracy', fontsize=40)
     plt.legend(['SGD', 'Adam', 'LBFGS'], fontsize=30, loc=4)
+    plt.grid(which='both')
 
     fig.savefig(out_path + datasets[id] + "-resnet18-test-acc.pdf", bbox_inches='tight')
 
