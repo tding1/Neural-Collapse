@@ -118,18 +118,32 @@ def compute_Sigma_B(mu_c_dict, mu_G):
 
     return Sigma_B.cpu().numpy()
 
+def compute_ETF(W):
+    K = W.shape[0]
+    WWT = torch.mm(W, W.T)
+    WWT /= torch.norm(WWT, p='fro')
+
+    sub = (torch.eye(K) - 1/K* torch.ones((K,K))).cuda() / pow(K-1, 0.5)
+    ETF_metric = torch.norm(WWT - sub, p='fro')
+    return ETF_metric.detach().cpu().numpy().item()
 
 def compute_W_H_relation(W, mu_c_dict, mu_G):
     K = len(mu_c_dict)
-    M = torch.empty(mu_c_dict[0].shape[0], K)
+    H = torch.empty(mu_c_dict[0].shape[0], K)
     for i in range(K):
-        M[:, i] = mu_c_dict[i] - mu_G
-    sub = 1 / np.sqrt(K-1) * (torch.eye(K) - torch.ones(K, K) / K)
+        H[:, i] = mu_c_dict[i] - mu_G
 
-    WH = W.cpu() @ M
-    res = torch.norm(WH / torch.norm(WH, p='fro') - sub, p='fro')
+    WH = torch.mm(W, H.cuda())
+    WH /= torch.norm(WH, p='fro')
+    sub = 1/pow(K-1, 0.5) * (torch.eye(K) - 1/K * torch.ones((K,K))).cuda()
 
-    return res.detach().cpu().numpy()
+    res = torch.norm(WH-sub, p='fro')
+    return res.detach().cpu().numpy().item(), H
+
+def compute_Wh_b_relation(W, mu_G, b):
+    Wh = torch.mv(W, mu_G.cuda())
+    res_b = torch.norm(Wh-b, p='fro')
+    return res_b.detach().cpu().numpy().item()
 
 
 def main():
@@ -138,29 +152,35 @@ def main():
     if args.load_path is None:
         sys.exit('Need to input the path to a pre-trained model!')
 
-    device = torch.device("cuda:" + str(args.gpu_id) if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:"+str(args.gpu_id) if torch.cuda.is_available() else "cpu")
     args.device = device
 
     trainloader, testloader, num_classes = make_dataset(args.dataset, args.data_dir, args.batch_size, args.sample_size)
 
-    model = models.__dict__[args.model](num_classes=num_classes, fc_bias=args.bias).to(device)
+    model = models.__dict__[args.model](num_classes=num_classes, fc_bias=args.bias, ETF_fc=args.ETF_fc, fixdim=args.fixdim, SOTA=args.SOTA).to(device)
     fc_features = FCFeatures()
     model.fc.register_forward_pre_hook(fc_features)
 
     info_dict = {
-        'collapse_metric': [],
-        'WH_relation_metric': [],
-        'W': [],
-        'b': [],
-        'mu_G_train': [],
-        'train_acc1': [],
-        'train_acc5': [],
-        'test_acc1': [],
-        'test_acc5': []
-    }
+                 'collapse_metric': [],
+                 'ETF_metric': [],
+                 'WH_relation_metric': [],
+                 'Wh_b_relation_metric':[],
+                 'W': [],
+                 'b': [],
+                 'H': [],
+                 'mu_G_train': [],
+                 # 'mu_G_test': [],
+                 'train_acc1': [],
+                 'train_acc5': [],
+                 'test_acc1': [],
+                 'test_acc5': []
+                 }
+
+    logfile = open('%s/test_log.txt' % (args.load_path), 'w')
     for i in range(args.epochs):
-        print(i)
-        model.load_state_dict(torch.load(args.load_path + 'epoch_' + str(i + 1).zfill(3) + '.pth'))
+
+        model.load_state_dict(torch.load(args.load_path + 'epoch_' + str(i+1).zfill(3) + '.pth'))
         model.eval()
 
         for n, p in model.named_parameters():
@@ -177,21 +197,36 @@ def main():
         Sigma_B = compute_Sigma_B(mu_c_dict_train, mu_G_train)
 
         collapse_metric = np.trace(Sigma_W @ scilin.pinv(Sigma_B)) / len(mu_c_dict_train)
-        WH_relation_metric = compute_W_H_relation(W, mu_c_dict_train, mu_G_train)
+        ETF_metric = compute_ETF(W)
+        WH_relation_metric, H = compute_W_H_relation(W, mu_c_dict_train, mu_G_train)
+        if args.bias:
+            Wh_b_relation_metric = compute_Wh_b_relation(W, mu_G_train, b)
+        else:
+            Wh_b_relation_metric = compute_Wh_b_relation(W, mu_G_train, torch.zeros((W.shape[0], )))
 
         info_dict['collapse_metric'].append(collapse_metric)
+        info_dict['ETF_metric'].append(ETF_metric)
         info_dict['WH_relation_metric'].append(WH_relation_metric)
-        info_dict['mu_G_train'].append(mu_G_train.detach().cpu().numpy())
+        info_dict['Wh_b_relation_metric'].append(Wh_b_relation_metric)
+
         info_dict['W'].append((W.detach().cpu().numpy()))
         if args.bias:
             info_dict['b'].append(b.detach().cpu().numpy())
+        info_dict['H'].append(H.detach().cpu().numpy())
+
+        info_dict['mu_G_train'].append(mu_G_train.detach().cpu().numpy())
+        # info_dict['mu_G_test'].append(mu_G_test.detach().cpu().numpy())
 
         info_dict['train_acc1'].append(train_acc1)
         info_dict['train_acc5'].append(train_acc5)
         info_dict['test_acc1'].append(test_acc1)
         info_dict['test_acc5'].append(test_acc5)
 
-    with open(args.load_path + 'info_raw.pkl', 'wb') as f:
+        print_and_save('[epoch: %d] | train top1: %.4f | train top5: %.4f | test top1: %.4f | test top5: %.4f ' %
+                       (i + 1, train_acc1, train_acc5, test_acc1, test_acc5), logfile)
+
+
+    with open(args.load_path + 'info_new.pkl', 'wb') as f:
         pickle.dump(info_dict, f)
 
 

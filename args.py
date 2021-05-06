@@ -14,6 +14,9 @@ def parse_train_args():
     # Model Selection
     parser.add_argument('--model', type=str, default='resnet18')
     parser.add_argument('--no-bias', dest='bias', action='store_false')
+    parser.add_argument('--ETF_fc', dest='ETF_fc', action='store_true')
+    parser.add_argument('--fixdim', dest='fixdim', type=int, default=0)
+    parser.add_argument('--SOTA', dest='SOTA', action='store_true')
 
     # Hardware Setting
     parser.add_argument('--gpu_id', type=int, default=0)
@@ -39,6 +42,7 @@ def parse_train_args():
     parser.add_argument('--optimizer', default='SGD', help='optimizer to use')
     parser.add_argument('--weight_decay', type=float, default=5e-4, help='weight decay')
     parser.add_argument('--history_size', type=int, default=50, help='history size for LBFGS')
+    parser.add_argument('--ghost_batch', type=int, dest='ghost_batch', default=128, help='ghost size for LBFGS variants')
 
     args = parser.parse_args()
 
@@ -93,6 +97,9 @@ def parse_eval_args():
     # Model Selection
     parser.add_argument('--model', type=str, default='resnet18')
     parser.add_argument('--no-bias', dest='bias', action='store_false')
+    parser.add_argument('--ETF_fc', dest='ETF_fc', action='store_true')
+    parser.add_argument('--fixdim', dest='fixdim', type=int, default=0)
+    parser.add_argument('--SOTA', dest='SOTA', action='store_true')
 
     # Hardware Setting
     parser.add_argument('--gpu_id', type=int, default=0)

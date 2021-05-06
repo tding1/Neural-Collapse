@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lrs
 
-
 def make_optimizer(args, my_model):
     trainable = filter(lambda x: x.requires_grad, my_model.parameters())
 
@@ -88,7 +87,6 @@ def count_network_parameters(model):
 def print_and_save(text_str, file_stream):
     print(text_str)
     print(text_str, file=file_stream)
-    file_stream.flush()
 
 
 def compute_accuracy(output, target, topk=(1,)):
@@ -102,6 +100,6 @@ def compute_accuracy(output, target, topk=(1,)):
 
     res = []
     for k in topk:
-        correct_k = correct[:k].view(-1).float().sum(0)
+        correct_k = correct[:k].reshape(-1).float().sum(0)
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
