@@ -1,5 +1,6 @@
 .DS_Store
 .idea/*
+model_weight/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
