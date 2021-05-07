@@ -87,11 +87,7 @@ Coming soon...
 
 Coming soon...
 
-## Citation
-
-Coming soon...
-
-## Reference 
+## Citation and reference 
 For technical details and full experimental results, please check [our paper](https://arxiv.org/abs/2105.02375).
 ```
 @article{zhu2021geometric,
