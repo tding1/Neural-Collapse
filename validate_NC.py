@@ -118,14 +118,16 @@ def compute_Sigma_B(mu_c_dict, mu_G):
 
     return Sigma_B.cpu().numpy()
 
+
 def compute_ETF(W):
     K = W.shape[0]
     WWT = torch.mm(W, W.T)
     WWT /= torch.norm(WWT, p='fro')
 
-    sub = (torch.eye(K) - 1/K* torch.ones((K,K))).cuda() / pow(K-1, 0.5)
+    sub = (torch.eye(K) - 1 / K * torch.ones((K, K))).cuda() / pow(K - 1, 0.5)
     ETF_metric = torch.norm(WWT - sub, p='fro')
     return ETF_metric.detach().cpu().numpy().item()
+
 
 def compute_W_H_relation(W, mu_c_dict, mu_G):
     K = len(mu_c_dict)
@@ -135,14 +137,15 @@ def compute_W_H_relation(W, mu_c_dict, mu_G):
 
     WH = torch.mm(W, H.cuda())
     WH /= torch.norm(WH, p='fro')
-    sub = 1/pow(K-1, 0.5) * (torch.eye(K) - 1/K * torch.ones((K,K))).cuda()
+    sub = 1 / pow(K - 1, 0.5) * (torch.eye(K) - 1 / K * torch.ones((K, K))).cuda()
 
-    res = torch.norm(WH-sub, p='fro')
+    res = torch.norm(WH - sub, p='fro')
     return res.detach().cpu().numpy().item(), H
+
 
 def compute_Wh_b_relation(W, mu_G, b):
     Wh = torch.mv(W, mu_G.cuda())
-    res_b = torch.norm(Wh-b, p='fro')
+    res_b = torch.norm(Wh - b, p='fro')
     return res_b.detach().cpu().numpy().item()
 
 
@@ -152,7 +155,7 @@ def main():
     if args.load_path is None:
         sys.exit('Need to input the path to a pre-trained model!')
 
-    device = torch.device("cuda:"+str(args.gpu_id) if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:" + str(args.gpu_id) if torch.cuda.is_available() else "cpu")
     args.device = device
 
     trainloader, testloader, num_classes = make_dataset(args.dataset, args.data_dir, args.batch_size, args.sample_size)
@@ -162,25 +165,25 @@ def main():
     model.fc.register_forward_pre_hook(fc_features)
 
     info_dict = {
-                 'collapse_metric': [],
-                 'ETF_metric': [],
-                 'WH_relation_metric': [],
-                 'Wh_b_relation_metric':[],
-                 'W': [],
-                 'b': [],
-                 'H': [],
-                 'mu_G_train': [],
-                 # 'mu_G_test': [],
-                 'train_acc1': [],
-                 'train_acc5': [],
-                 'test_acc1': [],
-                 'test_acc5': []
-                 }
+        'collapse_metric': [],
+        'ETF_metric': [],
+        'WH_relation_metric': [],
+        'Wh_b_relation_metric': [],
+        'W': [],
+        'b': [],
+        'H': [],
+        'mu_G_train': [],
+        # 'mu_G_test': [],
+        'train_acc1': [],
+        'train_acc5': [],
+        'test_acc1': [],
+        'test_acc5': []
+    }
 
     logfile = open('%s/test_log.txt' % (args.load_path), 'w')
     for i in range(args.epochs):
 
-        model.load_state_dict(torch.load(args.load_path + 'epoch_' + str(i+1).zfill(3) + '.pth'))
+        model.load_state_dict(torch.load(args.load_path + 'epoch_' + str(i + 1).zfill(3) + '.pth'))
         model.eval()
 
         for n, p in model.named_parameters():
@@ -225,8 +228,7 @@ def main():
         print_and_save('[epoch: %d] | train top1: %.4f | train top5: %.4f | test top1: %.4f | test top5: %.4f ' %
                        (i + 1, train_acc1, train_acc5, test_acc1, test_acc5), logfile)
 
-
-    with open(args.load_path + 'info_new.pkl', 'wb') as f:
+    with open(args.load_path + 'info.pkl', 'wb') as f:
         pickle.dump(info_dict, f)
 
 
