@@ -19,7 +19,7 @@
 
 ### Datasets
 
-By default, the code assumes the datasets for MNIST and CIFAR10 are stored under `~/data/`. If the datasets are not there, they will be automatically download ed from `torchvision.datasets`. User may change this default location of datasets in `args.py` through the argument `--data_dir`.
+By default, the code assumes the datasets for MNIST and CIFAR10 are stored under `~/data/`. If the datasets are not there, they will be automatically downloaded from `torchvision.datasets`. User may change this default location of datasets in `args.py` through the argument `--data_dir`.
 
 ### Training with SGD
 
