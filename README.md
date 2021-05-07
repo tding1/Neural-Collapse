@@ -1,5 +1,7 @@
 # A Geometric Analysis of Neural Collapse with Unconstrained Features
 
+This is the code for the [paper](https://arxiv.org/abs/2105.02375) "A Geometric Analysis of Neural Collapse with Unconstrained Features".
+
 ## Introduction
 
 - We provide the first global optimization landscape analysis of *Neural Collapse* (NC) – an intriguing empirical phenomenon that arises in the last-layer classifiers and features of neural networks during the terminal phase of training. 
