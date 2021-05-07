@@ -63,7 +63,19 @@ $ python plot.py
 
 ## Validating the unconstrained feature models for NC
 
-Coming soon...
+### Validity of Unconstrained Feature Models
+
+~~~Python
+$ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset cifar10_random --optimizer SGD --batch_size 64 --lr 0.01 --model <MLP or ResNet18_adapt> --width <specify width for model> --depth <specify depth for MLP> --weight_decay 1e-4
+
+$ python validate_NC.py --gpu_id 0 --dataset cifar10_random --batch_size 1000 --load_path <path to the uid name> --model <MLP or ResNet18_adapt> --width <specify width for model> --depth <specify depth for MLP>
+~~~
+
+### Weight Decay on the Network Parameter Θ vs. on the Features H
+
+~~~Python
+$ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset <mnist or cifar10> --optimizer SGD --batch_size 64 --lr 0.05 --model <specify model> --weight_decay <specify weight decay> --sep_decay --feature_decay_rate <specify weight decay on features>
+~~~
 
 ## Improving network design
 
@@ -78,3 +90,16 @@ Coming soon...
 ## Citation
 
 Coming soon...
+
+## Reference 
+For technical details and full experimental results, please check [our paper](https://arxiv.org/abs/2105.02375).
+```
+@article{zhu2021geometric,
+      title={A Geometric Analysis of Neural Collapse with Unconstrained Features}, 
+      author={Zhihui Zhu and Tianyu Ding and Jinxin Zhou and Xiao Li and Chong You and Jeremias Sulam and Qing Qu},
+      year={2021},
+      eprint={2105.02375},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```

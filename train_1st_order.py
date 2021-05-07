@@ -3,10 +3,28 @@ import sys
 import torch
 
 import models
+from models.res_adapt import ResNet18_adapt
 from utils import *
 from args import parse_train_args
 from datasets import make_dataset
 
+def loss_compute(args, model, criterion, outputs, targets):
+    if args.loss == 'CrossEntropy':
+        loss = criterion(outputs[0], targets)
+    elif args.loss == 'MSE':
+        loss = criterion(outputs[0], nn.functional.one_hot(targets).type(torch.FloatTensor).to(args.device))
+
+    # Now decide whether to add weight decay on last weights and last features
+    if args.sep_decay:
+        # Find features and weights
+        features = outputs[1]
+        w = model.fc.weight
+        b = model.fc.bias
+        lamb = args.weight_decay / 2
+        lamb_feature = args.feature_decay_rate / 2
+        loss += lamb * (torch.sum(w ** 2) + torch.sum(b ** 2)) + lamb_feature * torch.sum(features ** 2)
+
+    return loss
 
 def trainer(args, model, trainloader, epoch_id, criterion, optimizer, scheduler, logfile):
 
@@ -21,11 +39,14 @@ def trainer(args, model, trainloader, epoch_id, criterion, optimizer, scheduler,
 
         model.train()
         outputs = model(inputs)
-
-        if args.loss == 'CrossEntropy':
-            loss = criterion(outputs[0], targets)
-        elif args.loss == 'MSE':
-            loss = criterion(outputs[0], nn.functional.one_hot(targets).type(torch.FloatTensor).to(args.device))
+        
+        if args.sep_decay:
+            loss = loss_compute(args, model, criterion, outputs, targets)
+        else:
+            if args.loss == 'CrossEntropy':
+                loss = criterion(outputs[0], targets)
+            elif args.loss == 'MSE':
+                loss = criterion(outputs[0], nn.functional.one_hot(targets).type(torch.FloatTensor).to(args.device))
 
         optimizer.zero_grad()
         loss.backward()
@@ -68,6 +89,8 @@ def train(args, model, trainloader):
 def main():
     args = parse_train_args()
 
+    set_seed(manualSeed = args.seed)
+
     if args.optimizer == 'LBFGS':
         sys.exit('Support for training with 1st order methods!')
 
@@ -75,8 +98,13 @@ def main():
     args.device = device
 
     trainloader, _, num_classes = make_dataset(args.dataset, args.data_dir, args.batch_size, args.sample_size, SOTA=args.SOTA)
-
-    model = models.__dict__[args.model](num_classes=num_classes, fc_bias=args.bias, ETF_fc=args.ETF_fc, fixdim=args.fixdim, SOTA=args.SOTA).to(device)
+    
+    if args.model == "MLP":
+        model = models.__dict__[args.model](hidden = args.width, depth = args.depth, fc_bias=args.bias, num_classes=num_classes).to(device)
+    elif args.model == "ResNet18_adapt":
+        model = ResNet18_adapt(width = args.width, num_classes=num_classes, fc_bias=args.bias).to(device)
+    else:
+        model = models.__dict__[args.model](num_classes=num_classes, fc_bias=args.bias, ETF_fc=args.ETF_fc, fixdim=args.fixdim, SOTA=args.SOTA).to(device)
 
     train(args, model, trainloader)
 

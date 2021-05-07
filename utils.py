@@ -1,16 +1,34 @@
+import os
+import random
+import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lrs
 
+def set_seed(manualSeed=666):
+    random.seed(manualSeed)
+    np.random.seed(manualSeed)
+    torch.manual_seed(manualSeed)
+    torch.cuda.manual_seed(manualSeed)
+    torch.cuda.manual_seed_all(manualSeed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    os.environ['PYTHONHASHSEED'] = str(manualSeed)
+
 def make_optimizer(args, my_model):
     trainable = filter(lambda x: x.requires_grad, my_model.parameters())
+    
+    if args.sep_decay:
+        wd_term = 0
+    else:
+        wd_term = args.weight_decay
 
     if args.optimizer == 'SGD':
         optimizer_function = optim.SGD
         kwargs = {'momentum': 0.9,
                   'lr': args.lr,
-                  'weight_decay': args.weight_decay
+                  'weight_decay': wd_term#args.weight_decay
         }
     elif args.optimizer == 'Adam':
         optimizer_function = optim.Adam
@@ -18,7 +36,7 @@ def make_optimizer(args, my_model):
             'betas': (0.9, 0.999),
             'eps': 1e-08,
             'lr': args.lr,
-            'weight_decay': args.weight_decay
+            'weight_decay': wd_term#args.weight_decay
         }
     elif args.optimizer == 'LBFGS':
         optimizer_function = optim.LBFGS

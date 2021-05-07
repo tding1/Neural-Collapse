@@ -17,13 +17,18 @@ def parse_train_args():
     parser.add_argument('--ETF_fc', dest='ETF_fc', action='store_true')
     parser.add_argument('--fixdim', dest='fixdim', type=int, default=0)
     parser.add_argument('--SOTA', dest='SOTA', action='store_true')
+    
+    # MLP settings (only when using mlp and res_adapt(in which case only width has effect))
+    parser.add_argument('--width', type=int, default=1024)
+    parser.add_argument('--depth', type=int, default=6)
 
     # Hardware Setting
     parser.add_argument('--gpu_id', type=int, default=0)
+    parser.add_argument('--seed', type=int, default=6)
     parser.add_argument('--use_cudnn', type=bool, default=True)
 
     # Directory Setting
-    parser.add_argument('--dataset', type=str, choices=['mnist', 'cifar10'], default='mnist')
+    parser.add_argument('--dataset', type=str, choices=['mnist', 'cifar10', 'cifar10_random'], default='mnist')
     parser.add_argument('--data_dir', type=str, default='~/data')
     parser.add_argument('--uid', type=str, default=None)
     parser.add_argument('--force', action='store_true', help='force to override the given uid')
@@ -41,6 +46,9 @@ def parse_train_args():
     parser.add_argument('--gamma', type=float, default=0.1, help='learning rate decay factor for step decay')
     parser.add_argument('--optimizer', default='SGD', help='optimizer to use')
     parser.add_argument('--weight_decay', type=float, default=5e-4, help='weight decay')
+    # The following two should be specified when testing adding wd on Features
+    parser.add_argument('--sep_decay', action='store_true', help='whether to separate weight decay to last feature and last weights')
+    parser.add_argument('--feature_decay_rate', type=float, default=1e-4, help='weight decay for last layer feature')
     parser.add_argument('--history_size', type=int, default=10, help='history size for LBFGS')
     parser.add_argument('--ghost_batch', type=int, dest='ghost_batch', default=128, help='ghost size for LBFGS variants')
 
@@ -100,12 +108,16 @@ def parse_eval_args():
     parser.add_argument('--ETF_fc', dest='ETF_fc', action='store_true')
     parser.add_argument('--fixdim', dest='fixdim', type=int, default=0)
     parser.add_argument('--SOTA', dest='SOTA', action='store_true')
+    
+    # MLP settings (only when using mlp and res_adapt(in which case only width has effect))
+    parser.add_argument('--width', type=int, default=1024)
+    parser.add_argument('--depth', type=int, default=6)
 
     # Hardware Setting
     parser.add_argument('--gpu_id', type=int, default=0)
 
     # Directory Setting
-    parser.add_argument('--dataset', type=str, choices=['mnist', 'cifar10'], default='mnist')
+    parser.add_argument('--dataset', type=str, choices=['mnist', 'cifar10', 'cifar10_random'], default='mnist')
     parser.add_argument('--data_dir', type=str, default='~/data')
     parser.add_argument('--load_path', type=str, default=None)
 
