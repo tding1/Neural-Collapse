@@ -24,19 +24,19 @@ By default, the code assumes the datasets for MNIST and CIFAR10 are stored under
 ### Training with SGD
 
 ~~~python
-$ python train_1st_order.py --gpu_id 0 --uid <directory name for saving results> --dataset <mnist or cifar10> --optimizer SGD --batch_size 256 --lr 0.05
+$ python train_1st_order.py --gpu_id 0 --uid <saving results directory name> --dataset <mnist or cifar10> --optimizer SGD --batch_size 256 --lr 0.05
 ~~~
 
 ### Training with Adam
 
 ~~~Python
-$ python train_1st_order.py --gpu_id 0 --uid <directory name for saving results> --dataset <mnist or cifar10> --optimizer Adam --batch_size 256 --lr 0.001
+$ python train_1st_order.py --gpu_id 0 --uid <saving results directory name> --dataset <mnist or cifar10> --optimizer Adam --batch_size 256 --lr 0.001
 ~~~
 
 ### Training with LBFGS
 
 ~~~python
-$ python train_2nd_order.py --gpu_id 0 --uid <directory name for saving results> --dataset <mnist or cifar10> --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 2048
+$ python train_2nd_order.py --gpu_id 0 --uid <saving results directory name> --dataset <mnist or cifar10> --optimizer LBFGS --lr 0.1 --history_size 10 --batch_size 2048
 ~~~
 
 **Note:** For each epoch during training, a model will be saved under the directory `model_weights/<the uid name fed to the above commands>/` for the purpose of validating the NC phenomenon in the future. 
