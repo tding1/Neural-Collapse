@@ -5,6 +5,7 @@ import torch
 import scipy.linalg as scilin
 
 import models
+from models.res_adapt import ResNet18_adapt
 from utils import *
 from args import parse_eval_args
 from datasets import make_dataset
@@ -64,7 +65,7 @@ def compute_info(args, model, fc_features, dataloader, isTrain=True):
             mu_G /= sum(MNIST_TEST_SAMPLES)
             for i in range(len(MNIST_TEST_SAMPLES)):
                 mu_c_dict[i] /= MNIST_TEST_SAMPLES[i]
-    elif args.dataset == 'cifar10':
+    elif args.dataset == 'cifar10' or args.dataset == 'cifar10_random':
         if isTrain:
             mu_G /= sum(CIFAR10_TRAIN_SAMPLES)
             for i in range(len(CIFAR10_TRAIN_SAMPLES)):
@@ -99,7 +100,7 @@ def compute_Sigma_W(args, model, fc_features, mu_c_dict, dataloader, isTrain=Tru
             Sigma_W /= sum(MNIST_TRAIN_SAMPLES)
         else:
             Sigma_W /= sum(MNIST_TEST_SAMPLES)
-    elif args.dataset == 'cifar10':
+    elif args.dataset == 'cifar10' or args.dataset == 'cifar10_random':
         if isTrain:
             Sigma_W /= sum(CIFAR10_TRAIN_SAMPLES)
         else:
@@ -159,8 +160,14 @@ def main():
     args.device = device
 
     trainloader, testloader, num_classes = make_dataset(args.dataset, args.data_dir, args.batch_size, args.sample_size)
+    
+    if args.model == "MLP":
+        model = models.__dict__[args.model](hidden = args.width, depth = args.depth, fc_bias=args.bias, num_classes=num_classes).to(device)
+    elif args.model == "ResNet18_adapt":
+        model = ResNet18_adapt(width = args.width, num_classes=num_classes, fc_bias=args.bias).to(device)
+    else:
+        model = models.__dict__[args.model](num_classes=num_classes, fc_bias=args.bias, ETF_fc=args.ETF_fc, fixdim=args.fixdim, SOTA=args.SOTA).to(device)
 
-    model = models.__dict__[args.model](num_classes=num_classes, fc_bias=args.bias, ETF_fc=args.ETF_fc, fixdim=args.fixdim, SOTA=args.SOTA).to(device)
     fc_features = FCFeatures()
     model.fc.register_forward_pre_hook(fc_features)
 
