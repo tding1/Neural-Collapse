@@ -1,6 +1,6 @@
 # A Geometric Analysis of Neural Collapse with Unconstrained Features
 
-## Introdution
+## Introduction
 
 - We provide the first global optimization landscape analysis of *Neural Collapse* (NC) – an intriguing empirical phenomenon that arises in the last-layer classifiers and features of neural networks during the terminal phase of training. 
 - We study the problem based on a simplified *unconstrained feature model*, which isolates the topmost layers from the classifier of the neural network. In this context, we show that the cross-entropy loss with weight decay has a benign global landscape: the only global minimizers are the Simplex Equiangular Tight Frames (ETFs) while all other critical points are strict saddles whose Hessian exhibit negative curvature directions.
