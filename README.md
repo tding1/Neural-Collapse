@@ -32,7 +32,7 @@ $ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset <
 ### Training with Adam
 
 ~~~Python
-$ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset <mnist or cifar10> --optimizer Adam --batch_size 256 --lr 0.001
+$ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset <mnist or cifar10> --optimizer Adam --batch_size 64 --lr 0.001
 ~~~
 
 ### Training with LBFGS
@@ -63,7 +63,7 @@ $ python plot.py
 
 ## Validating the unconstrained feature models for NC
 
-### Validity of Unconstrained Feature Models
+### Validity of unconstrained feature models
 
 ~~~Python
 $ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset cifar10_random --optimizer SGD --batch_size 64 --lr 0.01 --model <MLP or ResNet18_adapt> --width <specify width for model> --depth <specify depth for MLP> --weight_decay 1e-4
@@ -71,7 +71,7 @@ $ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset c
 $ python validate_NC.py --gpu_id 0 --dataset cifar10_random --batch_size 1000 --load_path <path to the uid name> --model <MLP or ResNet18_adapt> --width <specify width for model> --depth <specify depth for MLP>
 ~~~
 
-### Weight Decay on the Network Parameter Θ vs. on the Features H
+### Weight decay on the network parameter Θ vs. on the features H
 
 ~~~Python
 $ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset <mnist or cifar10> --optimizer SGD --batch_size 64 --lr 0.05 --model <specify model> --weight_decay <specify weight decay> --sep_decay --feature_decay_rate <specify weight decay on features>
