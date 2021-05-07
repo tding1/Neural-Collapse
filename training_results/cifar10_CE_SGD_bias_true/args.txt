@@ -1,1 +1,0 @@
-Namespace(arg='./model_weights/cifar10_CE/args.txt', batch_size=128, bias=True, dataset='cifar10', decay_type='step', epochs=200, force=False, gamma=0.2, gpu_id=0, log='./model_weights/cifar10_CE/log.txt', loss='CrossEntropy', lr=0.05, model='resnet18', optimizer='SGD', patience=40, save_path='./model_weights/cifar10_CE', uid='cifar10_CE', use_cudnn=True, weight_decay=0.0005)
