@@ -81,12 +81,19 @@ $ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset <
 
 ### Fix the last-layer classifier as a Simplex ETF
 
-Coming soon...
+~~~Python
+$ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset <mnist or cifar10> --optimizer SGD --lr 0.05 --ETF
+~~~
 
 ### Feature dimension reduction by choosing `d=K`
+~~~Python
+$ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset <mnist or cifar10> --optimizer SGD --lr 0.05 --fixdim 10
+~~~
 
-Coming soon...
-
+### Introduce data augmentation and use modified ResNet architectures
+~~~Python
+$ python train_1st_order.py --gpu_id 0 --uid <saving directory name> --dataset <mnist or cifar10> --optimizer SGD --lr 0.05 --SOTA
+~~~
 ## Citation and reference 
 For technical details and full experimental results, please check [our paper](https://arxiv.org/abs/2105.02375).
 ```
