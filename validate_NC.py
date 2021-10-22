@@ -146,7 +146,7 @@ def compute_W_H_relation(W, mu_c_dict, mu_G):
 
 def compute_Wh_b_relation(W, mu_G, b):
     Wh = torch.mv(W, mu_G.cuda())
-    res_b = torch.norm(Wh - b, p='fro')
+    res_b = torch.norm(Wh + b, p='fro')
     return res_b.detach().cpu().numpy().item()
 
 
